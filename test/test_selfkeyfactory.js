@@ -5,21 +5,24 @@ const gnosisUtils = require('./utils/gnosis/general')
 const skUtils = require("./utils/txHelpers")
 
 /*const CreateAndAddModules = artifacts.require("./libraries/CreateAndAddModules.sol");*/
-const GnosisSafe = artifacts.require("./GnosisSafe.sol")
-const ProxyFactory = artifacts.require("./ProxyFactory.sol")
+const GnosisSafe = artifacts.require("@gnosis.pm/safe-contracts/contracts/GnosisSafe.sol")
+const ProxyFactory = artifacts.require("@gnosis.pm/safe-contracts/contracts/proxies/ProxyFactory.sol")
 /*const SocialRecoveryModule = artifacts.require("./SocialRecoveryModule.sol");
 const StateChannelModule = artifacts.require("./StateChannelModule.sol");*/
 const DIDLedger = artifacts.require("selfkey-did-ledger/contracts/DIDLedger.sol")
 const SelfKeySafeFactory = artifacts.require('./SelfKeySafeFactory.sol')
 
-/*const Web3 = require("web3")
-web3 = new Web3(web3.currentProvider)*/
+//const Web3 = require("web3")
+//web3 = new Web3(web3.currentProvider)
 
-contract('CreateAndAddModules', accounts => {
+contract('SelfKeySafeFactory', accounts => {
 
   const CALL = 0
   const CREATE = 2
   const ZERO = "0x0000000000000000000000000000000000000000"
+  const NONZERO1 = "0x0000000000000000000000000000000000000001"
+  const NONZERO2 = "0x0000000000000000000000000000000000000002"
+  const NONZERO3 = "0x0000000000000000000000000000000000000003"
 
   const executor = accounts[9]
 
@@ -36,16 +39,15 @@ contract('CreateAndAddModules', accounts => {
     selfkeyFactory = await SelfKeySafeFactory.new(proxyFactory.address, ledger.address)
 
     gnosisSafeMasterCopy = await gnosisUtils.deployContract("deploying Gnosis Safe Mastercopy", GnosisSafe)
-    /*gnosisSafeMasterCopy.setup(
-        [accounts[0], accounts[1], accounts[2]],
+    await gnosisSafeMasterCopy.setup(
+        [NONZERO1, NONZERO2, NONZERO3],
         2,
-        0,
+        ZERO,
         "0x",
+        ZERO,
         0,
-        0,
-        0,
-        0
-    )*/
+        ZERO
+    )
   })
 
   it('should create gnosis Proxy through SelfKey factory', async () => {
