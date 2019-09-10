@@ -1,30 +1,29 @@
-# {{name}}
+# selfkey-multisig
 
-{{description}}
+Gnosis-based implementation of the SelfKey Corporate Safe.
 
-* `develop` — [![CircleCI]({{circleci-badge-develop-link}})]({{circleci-project-develop-link}})
-* `master` — [![CircleCI]({{circleci-badge-master-link}})]({{circleci-project-master-link}})
+<!-- * `develop` — [![CircleCI]({{circleci-badge-develop-link}})]({{circleci-project-develop-link}})
+* `master` — [![CircleCI]({{circleci-badge-master-link}})]({{circleci-project-master-link}}) -->
 
 ## Overview
 
-This template is created to be used with [create-project](https://github.com/mafintosh/create-project), upon creating a new project, this README should be overwritten according to the project's needs.
+SelfKey Corporate Safe utilizes Gnosis Safe contracts to provide advanced multisig functionality that can be
+extended via _modules_.
 
-### How to use this template
+Currently, it implements the `SelfKeySafeFactory` contract that is able to instantiate Gnosis Safe proxies
+and grant them control of a newly registered SelfKey DID.
 
-1. Install [create-project](https://github.com/mafintosh/create-project): `npm install -g create-project`
-2. Create project on the main repo, fork and clone according to the [contribution guidelines](CONTRIBUTING.md)
-3. In the directory outside the locally cloned project, execute `create-project <project-name> SelfKeyFoundation/solidity-template`
-4. `git add` all the files included and make an initial commit
-5. Overwrite this README on the new repository and start working on your project...
 
 ## Development
 
-Smart contracts are being implemented using Solidity `0.5.4`.
+Smart contracts are being implemented using Solidity `0.5.0`.
 
 ### Prerequisites
 
-* [NodeJS](htps://nodejs.org), version 9.5+ (I use [`nvm`](https://github.com/creationix/nvm) to manage Node versions — `brew install nvm`.)
-* [truffle](http://truffleframework.com/), which is a comprehensive framework for Ethereum development. `npm install -g truffle` — this should install the latest truffle version.
+* [NodeJS v9.5.0](htps://nodejs.org)
+* [truffle v5.0.31](http://truffleframework.com/) (install globally)
+* [web3.js v1.2.1](https://github.com/ethereum/web3.js/) (already embedded in truffle package)
+* [ganache-cli v6.5.1](https://github.com/trufflesuite/ganache-cli)
 
 ### Initialization
 
@@ -32,13 +31,8 @@ Smart contracts are being implemented using Solidity `0.5.4`.
 
 ### Testing
 
-#### Standalone
-
+    ganache-cli
     npm test
-
-or with code coverage
-
-    npm run test:cov
 
 #### From within Truffle
 
@@ -54,11 +48,6 @@ then from the prompt you can run
 
 as well as other Truffle commands. See [truffleframework.com](http://truffleframework.com) for more.
 
-### Linting
-
-We provide the following linting command for inspecting solidity contracts.
-
-* `npm run lint:sol` — to lint the Solidity files, and
 
 ## Contributing
 
