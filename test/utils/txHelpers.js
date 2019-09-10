@@ -1,3 +1,12 @@
+const NONZERO = "0x0000000000000000000000000000000000000001"
+
+const createAndAddModulesData = (dataArray) => {
+    const mw = new web3.eth.Contract([{"constant":false,"inputs":[{"name":"data","type":"bytes"}],"name":"setup","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"}], NONZERO);
+    //let mw = ModuleDataWrapper(1)
+    // Remove method id (10) and position of data in payload (64)
+    return dataArray.reduce((acc, data) => acc + mw.methods.setup(data).encodeABI().substr(74), "0x")
+}
+
 /**
  *  extract the log for a specific event from the supplied transaction
  *  @param tx — The transaction to look into
@@ -34,6 +43,21 @@ const getAddress = (tx, event, variable) => {
   return address
 }
 
+function logGasUsage(subject, transactionOrReceipt) {
+    let receipt = transactionOrReceipt.receipt || transactionOrReceipt
+    console.log("    Gas costs for " + subject + ": " + receipt.gasUsed)
+}
+
+/**
+ *  Deploys contract and prints gas usage to console
+ */
+const deployContract = async (subject, contract) => {
+    let deployed = await contract.new()
+    let receipt = await web3.eth.getTransactionReceipt(deployed.transactionHash)
+    logGasUsage(subject, receipt)
+    return deployed
+}
+
 /**
  *  Get the contract instance given a transaction, event, and variable.
  *  @param tx — The transaction to look into
@@ -49,5 +73,7 @@ const getContract = (tx, event, variable, Contract) =>
 module.exports = {
   getLog,
   getAddress,
-  getContract
+  deployContract,
+  getContract,
+  createAndAddModulesData
 }

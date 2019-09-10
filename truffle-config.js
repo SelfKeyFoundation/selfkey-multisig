@@ -13,6 +13,7 @@ const { mnemonic } = JSON.parse(fs.readFileSync(walletPath))
 const MainnetProvider = new HDWalletProvider(mnemonic, mainnetURL)
 const RopstenProvider = new HDWalletProvider(mnemonic, ropstenURL)
 
+
 module.exports = {
   networks: {
     // Useful for testing. The `development` name is special - truffle uses it by default
@@ -70,7 +71,7 @@ module.exports = {
   // Configure your compilers
   compilers: {
     solc: {
-      version: "^0.5.4"    // Fetch exact version from solc-bin (default: truffle's version)
+      //version: "0.5.10"    // Fetch exact version from solc-bin (default: truffle's version)
       // docker: true,        // Use "0.5.1" you've installed locally with docker (default: false)
       // settings: {          // See the solidity docs for advice about optimization and evmVersion
       //  optimizer: {

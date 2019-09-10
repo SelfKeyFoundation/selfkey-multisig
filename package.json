@@ -1,7 +1,7 @@
 {
-  "name": "{{name}}",
+  "name": "selfkey-multisig",
   "version": "0.0.1",
-  "description": "{{description}}",
+  "description": "Gnosis safe for SelfKey corporate identities",
   "author": "",
   "scripts": {
     "test": "truffle test",
@@ -9,14 +9,29 @@
     "lint:sol": "solhint contracts/**/*.sol"
   },
   "devDependencies": {
-    "solhint": "^1.5.1",
-    "solidity-coverage": "^0.6.0-beta.3",
-    "truffle-hdwallet-provider": "^1.0.5"
+    "@digix/tempo": "^0.2.0",
+    "@gnosis.pm/mock-contract": "github:gnosis/mock-contract#sol_0_5_0",
+    "@gnosis.pm/truffle-nice-tools": "^1.3.0",
+    "bignumber.js": "github:frozeman/bignumber.js-nolookahead",
+    "eth-lightwallet": "^4.0.0",
+    "ethereumjs-abi": "^0.6.5",
+    "ethereumjs-util": "^6.0.0",
+    "ganache-cli": "^6.3.0",
+    "random-buffer": "*",
+    "solidity-coverage": "^0.6.2",
+    "truffle": "^5.0.34",
+    "web3": "^0.20.7",
+    "zos": "^2.4.1"
   },
   "dependencies": {
+    "@gnosis.pm/safe-contracts": "^0.1.0",
+    "@gnosis.pm/util-contracts": "^2.0.0",
     "dotenv": "^8.0.0",
-    "ethereumjs-util": "^6.1.0",
-    "openzeppelin-solidity": "^2.2.0",
-    "truffle": "^5.0.8"
+    "ethereumjs-testrpc": "^6.0.3",
+    "flow-bin": "^0.102.0",
+    "openzeppelin-solidity": "^2.3.0",
+    "selfkey-did-ledger": "^1.0.1",
+    "solc": "^0.5.10",
+    "truffle-hdwallet-provider": "^1.0.17"
   }
 }
