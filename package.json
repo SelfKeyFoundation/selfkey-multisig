@@ -10,13 +10,14 @@
   },
   "devDependencies": {
     "@gnosis.pm/mock-contract": "github:gnosis/mock-contract#sol_0_5_0",
+    "@truffle/hdwallet-provider": "^1.0.18",
+    "diff": "^4.0.1",
     "eth-lightwallet": "^4.0.0",
     "truffle": "^4.1.14"
   },
   "dependencies": {
     "@gnosis.pm/safe-contracts": "^1.0.0",
     "dotenv": "^8.0.0",
-    "selfkey-did-ledger": "^1.0.1",
-    "truffle-hdwallet-provider": "^1.0.17"
+    "selfkey-did-ledger": "^1.0.1"
   }
 }
