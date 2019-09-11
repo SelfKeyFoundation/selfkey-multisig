@@ -20,7 +20,6 @@ contract('SelfKeySafeFactory', accounts => {
   const CALL = 0
   const CREATE = 2
   const ZERO = "0x0000000000000000000000000000000000000000"
-  const NONZERO1 = "0x0000000000000000000000000000000000000001"
   const NONZERO2 = "0x0000000000000000000000000000000000000002"
   const NONZERO3 = "0x0000000000000000000000000000000000000003"
 
@@ -40,7 +39,7 @@ contract('SelfKeySafeFactory', accounts => {
 
     gnosisSafeMasterCopy = await gnosisUtils.deployContract("deploying Gnosis Safe Mastercopy", GnosisSafe)
     await gnosisSafeMasterCopy.setup(
-        [NONZERO1, NONZERO2, NONZERO3],
+        [NONZERO2, NONZERO3],
         2,
         ZERO,
         "0x",
