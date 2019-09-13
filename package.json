@@ -1,6 +1,6 @@
 {
   "name": "selfkey-multisig",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Gnosis safe for SelfKey corporate identities",
   "author": "",
   "scripts": {
