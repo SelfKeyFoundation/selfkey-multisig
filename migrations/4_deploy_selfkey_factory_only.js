@@ -1,7 +1,7 @@
 const SelfKeySafeFactory = artifacts.require("SelfKeySafeFactory.sol")
 
-let proxyFactoryAddress = "0xcF1D340391c7A6AE96f39F162f2eEAE9ea35935E"
-let ledgerAddress = "0x0518E0927c6888DCADa83Df1D6c54ee146dA02b3"
+let proxyFactoryAddress = "0x614556eb554a11bc644dcb8edc5f5472565e1e6a"
+let ledgerAddress = "0x0cb853331293d689c95187190e09bb46cb4e533e"
 
 module.exports = async function(deployer) {
   await deployer.deploy(SelfKeySafeFactory, proxyFactoryAddress, ledgerAddress)

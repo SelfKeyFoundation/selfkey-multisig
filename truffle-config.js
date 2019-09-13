@@ -1,6 +1,6 @@
 require('dotenv').config()
 
-const HDWalletProvider = require('truffle-hdwallet-provider')
+const HDWalletProvider = require('@truffle/hdwallet-provider')
 const fs = require('fs');
 
 const infuraKey = process.env["INFURA_KEY"]
@@ -48,12 +48,20 @@ module.exports = {
     ropsten: {
       provider: () => RopstenProvider,
       network_id: 3,
-      gas: 5500000,
-      gasPrice: 5000000000, // 5 gwei
+      gas: 7500000,
+      gasPrice: 20000000000, // 20 gwei
       // confirmations: 2,    // # of confs to wait between deployments. (default: 0)
       // timeoutBlocks: 200,  // # of blocks before a deployment times out  (minimum/default: 50)
-      // skipDryRun: true     // Skip dry run before migrations? (default: false for public nets )
+      //skipDryRun: true     // Skip dry run before migrations? (default: false for public nets )
     },
+    mainnet: {
+      provider: () => MainnetProvider,
+      network_id: 1,
+      //from: addresses[0],
+      gas: 7500000,
+      gasPrice: 25000000000, // 25 gwei
+      //skipDryRun: true     // Skip dry run before migrations? (default: false for public nets )
+    }
 
     // Useful for private networks
     // private: {

@@ -1,6 +1,6 @@
 {
   "name": "selfkey-multisig",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Gnosis safe for SelfKey corporate identities",
   "author": "",
   "scripts": {
@@ -13,6 +13,7 @@
     "@truffle/hdwallet-provider": "^1.0.18",
     "diff": "^4.0.1",
     "eth-lightwallet": "^4.0.0",
+    "fs": "0.0.1-security",
     "truffle": "^4.1.14"
   },
   "dependencies": {
