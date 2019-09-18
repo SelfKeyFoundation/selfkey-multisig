@@ -23,10 +23,6 @@ contract('SelfKeySafeFactory', accounts => {
   const NONZERO2 = "0x0000000000000000000000000000000000000002"
   const NONZERO3 = "0x0000000000000000000000000000000000000003"
 
-  const executor = accounts[9]
-
-  //let proxyFactory, createAndAddModules, gnosis, gnosis2, ledger, lw
-  //let owner1, owner2, owner3, friend1, friend2, friend3, user1, user2
   let gnosisSafeMasterCopy, selfkeyFactory, ledger, createAndAddModules
   let stateChannelModuleMasterCopy, socialRecoveryModuleMasterCopy
 
@@ -39,15 +35,7 @@ contract('SelfKeySafeFactory', accounts => {
     selfkeyFactory = await SelfKeySafeFactory.new(proxyFactory.address, ledger.address)
 
     gnosisSafeMasterCopy = await gnosisUtils.deployContract("deploying Gnosis Safe Mastercopy", GnosisSafe)
-    await gnosisSafeMasterCopy.setup(
-        [NONZERO2, NONZERO3],
-        2,
-        ZERO,
-        "0x",
-        ZERO,
-        0,
-        ZERO
-    )
+    await gnosisSafeMasterCopy.setup([NONZERO2, NONZERO3], 2, ZERO, "0x", ZERO, 0, ZERO)
 
     // deploy module master copies
     stateChannelModuleMasterCopy = await StateChannelModule.new()
@@ -110,8 +98,11 @@ contract('SelfKeySafeFactory', accounts => {
     let proxyAddress = log.args.proxy
 
     let gnosisSafe = await GnosisSafe.at(proxyAddress)
-    let modules = await gnosisSafe.getModules()
-    console.log(modules)    // how are these modules discoverable? are they?
+    let modules = await gnosisSafe.getModules() // how are these modules discoverable? are they?
     assert.equal(2, modules.length)
+  })
+
+  xit('should be able to enable additional new modules to Gnosis proxy', async () => {
+    // test enableModule. Has to be done via a Safe transaction
   })
 })
