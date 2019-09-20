@@ -64,7 +64,7 @@ The method is public, therefore it can be called by anyone. The address of the G
 **Mainnet: 0x6437454Cebcc188860c6Fe16d36BF2f6cBCFC936**
 **Ropsten: 0xF53506D009f0b1EBD961285B40CEa207cC628519**
 
-### Creating a Gnosis Safe tied to SelfKey DID
+### Deploying a Gnosis Safe tied to SelfKey DID
 
 Example using web3js v1.2.1:
 
@@ -78,7 +78,7 @@ const factory = new web3.eth.Contract(factoryABI, factoryAddress)
 const masterCopy = '0x8d7ef7cDCa4F7704eA2a47AcfA94FA8d2F1C631c' // address of deployed Gnosis master copy
 
 // deploy new SelfKey Safe instance
-let tx = factory.methods.deploySafeProxy(masterCopy, "0x").send({ 'from': '0x55f8F83cc3641b0558E896CD4E042757a7fD5B83' })
+let tx = factory.methods.deploySafeProxy(masterCopy, "0x").send({ 'from': senderAddress })
 let newProxy, proxyDID
 tx.then((result) => {
   newProxy = result.events.SelfKeySafeProxyCreated.returnValues.proxy
@@ -86,7 +86,46 @@ tx.then((result) => {
 })
 ```
 
-For info on how to interact with the Gnosis Proxy, refer to the official [Gnosis project repository](https://github.com/gnosis/safe-contracts/tree/v1.0.0).
+### Deploying a Safe with Gnosis modules
+
+Gnosis Safe allows to receive encoded data in its `setup` method, thus allowing for custom initialization such
+as the deployment of attached modules. In order to do so, any intended calls should be encoded using `encodeABI()` web3 function and sent as data during Safe deployment.
+
+Example:
+
+(Note: `socialRecoveryModule`, `proxyFactory`, `createAndAddModules` and `gnosisMasterCopy` contracts should be
+loaded at their respective deployed addresses)
+
+```JavaScript
+let recoverySetupData = socialRecoveryModule.methods.setup([friend1, friend2], 2).encodeABI()
+let recoveryCreationData = proxyFactory.methods.createProxy(
+  socialRecoveryModuleAddress,
+  recoverySetupData
+).encodeABI()
+
+let modulesCreationData = gnosisUtils.createAndAddModulesData([recoveryCreationData])
+let createAndAddModulesData = createAndAddModules.methods.createAndAddModules(
+  proxyFactoryAddress,
+  modulesCreationData
+).encodeABI()
+
+let gnosisSafeData = gnosisMasterCopy.methods.setup(
+  [account1, account2, account3],
+  2,
+  createAndAddModulesAddress,
+  createAndAddModulesData,
+  ZERO,
+  0,
+  ZERO
+).encodeABI()
+
+selfKeyFactory.methods.deploySafeProxy(gnosisMasterCopyAddress, gnosisSafeData).send({ 'from': senderAddress })
+```
+
+`SelfKeySafeFactory` contract will pass the initialization data to Gnosis' `proxyFactory` for instantiation of
+the modules.
+
+For more detail, check this project [test scripts]('test/') and the official [Gnosis project repository](https://github.com/gnosis/safe-contracts/tree/v1.0.0).
 
 ## Contributing
 
