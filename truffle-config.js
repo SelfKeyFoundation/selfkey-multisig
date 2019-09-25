@@ -11,7 +11,7 @@ const walletPath = "./local/wallet.json"  // Should be JSON file where "mnemonic
 const { mnemonic } = JSON.parse(fs.readFileSync(walletPath))
 
 const MainnetProvider = new HDWalletProvider(mnemonic, mainnetURL)
-const RopstenProvider = new HDWalletProvider(mnemonic, ropstenURL)
+const RopstenProvider = new HDWalletProvider(mnemonic, ropstenURL, 0, 6)
 
 
 module.exports = {

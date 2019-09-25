@@ -64,9 +64,30 @@ The method is public, therefore it can be called by anyone. The address of the G
 **Mainnet: 0x6437454Cebcc188860c6Fe16d36BF2f6cBCFC936**
 **Ropsten: 0xF53506D009f0b1EBD961285B40CEa207cC628519**
 
-### Deploying a Gnosis Safe tied to SelfKey DID
+## Web3 Examples
 
-Example using web3js v1.2.1:
+The following examples were tested using truffle console in testnet (Ropsten) and web3 v1.2.1.
+In order to do the same, execute the following shell commands:
+
+```bash
+> truffle console --network ropsten
+truffle(ropsten)> exec 'testScript.js'
+```
+
+`testScript.js` must _export_ a function in order to be executed via truffle console. For example:
+
+```JavaScript
+// testScript.js
+module.exports = async function(callback) {
+  // do testing, calls, prints, etc...
+  callback()
+}
+```
+
+In the following examples this structure has been left out for brevity. Also, async/await is used for better
+readability.
+
+### Deploying a Gnosis Safe tied to SelfKey DID
 
 ```JavaScript
 // load contract
@@ -75,15 +96,16 @@ const factoryAddress = '0xF53506D009f0b1EBD961285B40CEa207cC628519'
 const factoryABI = JSON.parse(fs.readFileSync('../build/contracts/SelfKeySafeFactory.json')).abi
 const factory = new web3.eth.Contract(factoryABI, factoryAddress)
 
-const masterCopy = '0x8d7ef7cDCa4F7704eA2a47AcfA94FA8d2F1C631c' // address of deployed Gnosis master copy
+// same for loading gnosisABI, etc...
+
+const gnosisMasterCopy = '0x8d7ef7cDCa4F7704eA2a47AcfA94FA8d2F1C631c' // address of deployed Gnosis master copy
 
 // deploy new SelfKey Safe instance
-let tx = factory.methods.deploySafeProxy(masterCopy, "0x").send({ 'from': senderAddress })
-let newProxy, proxyDID
-tx.then((result) => {
-  newProxy = result.events.SelfKeySafeProxyCreated.returnValues.proxy
-  proxyDID = result.events.SelfKeySafeProxyCreated.returnValues.did
-})
+let tx = await factory.methods.deploySafeProxy(gnosisMasterCopy, "0x").send({ 'from': senderAddress })
+let newProxyAddress = result.events.SelfKeySafeProxyCreated.returnValues.proxy
+let proxyDID = result.events.SelfKeySafeProxyCreated.returnValues.did   // this DID is controlled by Gnosis proxy
+
+let gnosis = new web3.eth.Contract(gnosisABI, newProxyAddress)
 ```
 
 ### Deploying a Safe with Gnosis modules
@@ -93,11 +115,12 @@ as the deployment of attached modules. In order to do so, any intended calls sho
 
 Example:
 
-(Note: `socialRecoveryModule`, `proxyFactory`, `createAndAddModules` and `gnosisMasterCopy` contracts should be
-loaded at their respective deployed addresses)
+(Note: `socialRecoveryModuleMaster`, `proxyFactory`, `createAndAddModules` and `gnosisMasterCopy` contracts should be loaded at their respective deployed addresses)
 
 ```JavaScript
-let recoverySetupData = socialRecoveryModule.methods.setup([friend1, friend2], 2).encodeABI()
+const ZERO = "0x0000000000000000000000000000000000000000"
+
+let recoverySetupData = socialRecoveryModuleMaster.methods.setup([friend1, friend2], 2).encodeABI()
 let recoveryCreationData = proxyFactory.methods.createProxy(
   socialRecoveryModuleAddress,
   recoverySetupData
@@ -119,11 +142,44 @@ let gnosisSafeData = gnosisMasterCopy.methods.setup(
   ZERO
 ).encodeABI()
 
-selfKeyFactory.methods.deploySafeProxy(gnosisMasterCopyAddress, gnosisSafeData).send({ 'from': senderAddress })
+let deployTx = await selfKeyFactory.methods.deploySafeProxy(gnosisMasterCopyAddress, gnosisSafeData).send()
+let newProxy = deployTx.events.SelfKeySafeProxyCreated.returnValues.proxy
+let proxyDID = deployTx.events.SelfKeySafeProxyCreated.returnValues.did
+
+let gnosis = new web3.eth.Contract(gnosisMasterCopyABI, newProxy)
+let modules = await gnosis.methods.getModules().call()
+let socialRecoveryModule = new web3.eth.Contract(socialRecoveryModuleABI, modules[0])
 ```
 
-`SelfKeySafeFactory` contract will pass the initialization data to Gnosis' `proxyFactory` for instantiation of
-the modules.
+### Interacting with the Social Recovery Module
+
+Gnosis' social recovery module allows to make a call to gnosis `swapOwner` method, given that the transaction
+has been confirmed by the required number of friends (see previous examples for module deployment and setup).
+The `swapOwner` method receives 3 parameters:
+
+* `prevOwner`: address appearing as previous than the target position in the _linked list_ that stores
+owner addresses (source: [Gnosis ModuleManager contract](https://github.com/gnosis/safe-contracts/blob/v1.0.0/contracts/base/OwnerManager.sol)). The first and
+last "element" of the list is called a "sentinel" (set as the address 0x1).
+* `oldOwner`: owner address to be replaced.
+* `newOwner`: new owner address to substitute the old one.
+
+The call to this method must be encoded as a hash in order to confirm this transaction hash by all required
+friends before execution. The social recovery module implements a `getDataHash` function to help in the process.
+The setup shown previously is used in the following example.
+
+```JavaScript
+const SENTINEL = "0x0000000000000000000000000000000000000001"
+
+// change accounts[0] for accounts[5]
+let data = gnosis.methods.swapOwner(SENTINEL, accounts[0], accounts[5]).encodeABI()
+let dataHash = await socialRecoveryModule.methods.getDataHash(data).call()  // get transaction hash
+
+await socialRecoveryModule.methods.confirmTransaction(dataHash).send({ from: accounts[3] }) // friend1 confirms
+await socialRecoveryModule.methods.confirmTransaction(dataHash).send({ from: accounts[4] }) // friend2 confirms
+
+await socialRecoveryModule.methods.recoverAccess(SENTINEL, accounts[0], accounts[5]).send({ from: accounts[3] })
+console.log("5 is now owner? " + await gnosis.methods.isOwner(accounts[5]).call())  // prints true
+```
 
 For more detail, check this project [test scripts]('test/') and the official [Gnosis project repository](https://github.com/gnosis/safe-contracts/tree/v1.0.0).
 
