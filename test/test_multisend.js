@@ -5,10 +5,13 @@ const abi = require("ethereumjs-abi")
 const GnosisSafe = artifacts.require("./GnosisSafe.sol")
 const ProxyFactory = artifacts.require("./ProxyFactory.sol")
 const Proxy = artifacts.require("./Proxy.sol")
-//const MultiSend = artifacts.require("./libraries/MultiSend.sol")
+
 const MultiSend = artifacts.require("contracts/MultiSend2.sol")
 const CreateAndAddModules = artifacts.require("./libraries/CreateAndAddModules.sol")
 const StateChannelModule = artifacts.require("./modules/StateChannelModule.sol");
+
+const MockToken = artifacts.require("./MockToken.sol")
+const MockStaking = artifacts.require("./MockStaking.sol")
 
 const Web3 = require('web3')
 //web3.eth.defaultAccount = web3.eth.accounts[0]
@@ -178,5 +181,51 @@ contract('MultiSend', function(accounts) {
       'ExecutionFailed', gnosisSafe.address, true, 'execTransaction send multiple transactions'
     )
     assert.equal(await gnosisSafe.getThreshold(), 1)
+  })
+
+  it('can approve and execute token transfer to contract on a single transaction', async () => {
+    // Deposit 2 ETH
+    const token = await MockToken.new()
+    const staking = await MockStaking.new(token.address)
+
+    await token.freeMoney(gnosisSafe.address, 1000)
+    assert.equal(await token.balanceOf(gnosisSafe.address), 1000)
+    assert.equal(await token.balanceOf(staking.address), 0)
+
+
+    // Create module data
+    let approveData = await token.contract.methods.approve(staking.address, 100).encodeABI()
+    let stakeData = await staking.contract.methods.stake(100).encodeABI()
+
+    let nestedTransactionData = '0x' +
+      encodeData(0, token.address, 0, approveData) +
+      encodeData(0, staking.address, 0, stakeData)
+
+    let data = await multiSend.contract.methods.multiSend(nestedTransactionData).encodeABI()
+
+    let nonce = await gnosisSafe.nonce()
+    let transactionHash = await gnosisSafe.getTransactionHash(
+      multiSend.address,
+      0,
+      data,
+      DELEGATECALL,
+      0,
+      0,
+      0,
+      ZERO,
+      ZERO,
+      nonce
+    )
+    let sigs = gnosisUtils.signTransaction(lw, [lw.accounts[0]], transactionHash)
+
+    gnosisUtils.logGasUsage(
+      'execTransaction send approval + execute',
+      await gnosisSafe.execTransaction(
+        multiSend.address, 0, data, DELEGATECALL, 0, 0, 0, ZERO, ZERO, sigs
+      )
+    )
+
+    assert.equal(await token.balanceOf(gnosisSafe.address), 900)
+    assert.equal(await token.balanceOf(staking.address), 100)
   })
 })
