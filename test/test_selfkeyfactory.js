@@ -98,11 +98,11 @@ contract('SelfKeySafeFactory', accounts => {
     let proxyAddress = log.args.proxy
 
     let gnosisSafe = await GnosisSafe.at(proxyAddress)
-    let modules = await gnosisSafe.getModules() // how are these modules discoverable? are they?
+    let modules = await gnosisSafe.getModules()
     assert.equal(2, modules.length)
   })
 
-  xit('should be able to enable additional new modules to Gnosis proxy', async () => {
+  //xit('should be able to enable additional new modules to Gnosis proxy', async () => {
     // test enableModule. Has to be done via a Safe transaction
-  })
+  //})
 })
