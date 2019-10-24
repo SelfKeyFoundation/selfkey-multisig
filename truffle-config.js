@@ -59,7 +59,7 @@ module.exports = {
       network_id: 1,
       //from: addresses[0],
       gas: 7500000,
-      gasPrice: 35000000000,
+      gasPrice: 15000000000,
       //skipDryRun: true     // Skip dry run before migrations? (default: false for public nets )
     }
 

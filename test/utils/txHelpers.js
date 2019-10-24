@@ -1,10 +1,21 @@
+const util = require("ethereumjs-util")
+const abi = require("ethereumjs-abi")
+
 const NONZERO = "0x0000000000000000000000000000000000000001"
 
 const createAndAddModulesData = (dataArray) => {
-    const mw = new web3.eth.Contract([{"constant":false,"inputs":[{"name":"data","type":"bytes"}],"name":"setup","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"}], NONZERO);
-    //let mw = ModuleDataWrapper(1)
-    // Remove method id (10) and position of data in payload (64)
-    return dataArray.reduce((acc, data) => acc + mw.methods.setup(data).encodeABI().substr(74), "0x")
+  const mw = new web3.eth.Contract([{"constant":false,"inputs":[{"name":"data","type":"bytes"}],"name":"setup","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"}], NONZERO);
+  //let mw = ModuleDataWrapper(1)
+  // Remove method id (10) and position of data in payload (64)
+  return dataArray.reduce((acc, data) => acc + mw.methods.setup(data).encodeABI().substr(74), "0x")
+}
+
+/* Encodes data to be used with Multisend library, using Multisend2 encoding */
+const encodeData = (operation, to, value, data) => {
+  let dataBuffer = Buffer.from(util.stripHexPrefix(data), "hex")
+  let encoded = abi.solidityPack(["uint8", "address", "uint256", "uint256", "bytes"],
+    [operation, to, value, dataBuffer.length, dataBuffer])
+  return encoded.toString("hex")
 }
 
 /**
@@ -75,5 +86,6 @@ module.exports = {
   getAddress,
   deployContract,
   getContract,
-  createAndAddModulesData
+  createAndAddModulesData,
+  encodeData
 }

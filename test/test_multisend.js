@@ -1,6 +1,5 @@
 const gnosisUtils = require('./utils/gnosis/general')
-const util = require("ethereumjs-util")
-const abi = require("ethereumjs-abi")
+const { encodeData } = require('./utils/txHelpers')
 
 const GnosisSafe = artifacts.require("./GnosisSafe.sol")
 const ProxyFactory = artifacts.require("./ProxyFactory.sol")
@@ -13,10 +12,6 @@ const StateChannelModule = artifacts.require("./modules/StateChannelModule.sol")
 const MockToken = artifacts.require("./MockToken.sol")
 const MockStaking = artifacts.require("./MockStaking.sol")
 
-const Web3 = require('web3')
-//web3.eth.defaultAccount = web3.eth.accounts[0]
-const TransactionWrapper = (new Web3()).eth.contract([{"constant":false,"inputs":[{"name":"operation","type":"uint8"},{"name":"to","type":"address"},{"name":"value","type":"uint256"},{"name":"data","type":"bytes"}],"name":"send","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"}]);
-
 
 contract('MultiSend', function(accounts) {
   const ZERO = "0x0000000000000000000000000000000000000000"
@@ -27,16 +22,8 @@ contract('MultiSend', function(accounts) {
   let proxyFactory
   let stateChannelModuleMasterCopy
   let lw
-  let tw = TransactionWrapper.at(1)
 
   const DELEGATECALL = 1
-
-  let encodeData = function(operation, to, value, data) {
-    let dataBuffer = Buffer.from(util.stripHexPrefix(data), "hex")
-    let encoded = abi.solidityPack(["uint8", "address", "uint256", "uint256", "bytes"],
-      [operation, to, value, dataBuffer.length, dataBuffer])
-    return encoded.toString("hex")
-  }
 
   beforeEach(async function () {
     // Create Gnosis Safe and MultiSend library
@@ -50,7 +37,7 @@ contract('MultiSend', function(accounts) {
     stateChannelModuleMasterCopy = await StateChannelModule.new()
   })
 
-  it('should deposit and withdraw 2 ETH and change threshold in 1 transaction', async () => {
+  it('should perform multiple transactions in 1', async () => {
     // Threshold is 1 after deployment. Also, no modules yet.
     assert.equal(await gnosisSafe.getThreshold(), 1)
     assert.deepEqual(await gnosisSafe.getModules(), [])
@@ -76,16 +63,13 @@ contract('MultiSend', function(accounts) {
       modulesCreationData
     ).encodeABI()
 
-    // Withdraw 2 ETH and change threshold
+    // Change threshold, create module and withdraw 1 ETH
     let nonce = await gnosisSafe.nonce()
     let changeData = await gnosisSafe.contract.methods.changeThreshold(2).encodeABI()
 
     let nestedTransactionData = '0x' +
-      //encodeData(0, gnosisSafe.address, 0, '0x' + '0'.repeat(64)) +
       encodeData(0, gnosisSafe.address, 0, changeData) +
-      //encodeData(0, accounts[0], web3.utils.toWei("0.5", 'ether'), '0x') +
       encodeData(1, createAndAddModules.address, 0, createAndAddModulesData) +
-      //encodeData(0, accounts[1], web3.utils.toWei("0.5", 'ether'), '0x') +
       encodeData(0, accounts[2], web3.utils.toWei("1", 'ether'), '0x')
 
     let data = await multiSend.contract.methods.multiSend(nestedTransactionData).encodeABI()
@@ -184,7 +168,6 @@ contract('MultiSend', function(accounts) {
   })
 
   it('can approve and execute token transfer to contract on a single transaction', async () => {
-    // Deposit 2 ETH
     const token = await MockToken.new()
     const staking = await MockStaking.new(token.address)
 
@@ -192,9 +175,9 @@ contract('MultiSend', function(accounts) {
     assert.equal(await token.balanceOf(gnosisSafe.address), 1000)
     assert.equal(await token.balanceOf(staking.address), 0)
 
-
-    // Create module data
+    // Call data
     let approveData = await token.contract.methods.approve(staking.address, 100).encodeABI()
+    console.log(approveData)
     let stakeData = await staking.contract.methods.stake(100).encodeABI()
 
     let nestedTransactionData = '0x' +
