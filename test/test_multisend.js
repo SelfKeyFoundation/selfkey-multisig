@@ -167,7 +167,7 @@ contract('MultiSend', function(accounts) {
     assert.equal(await gnosisSafe.getThreshold(), 1)
   })
 
-  it('can approve and execute token transfer to contract on a single transaction', async () => {
+  it('can approve and execute call to a staking contract', async () => {
     const token = await MockToken.new()
     const staking = await MockStaking.new(token.address)
 
@@ -177,7 +177,6 @@ contract('MultiSend', function(accounts) {
 
     // Call data
     let approveData = await token.contract.methods.approve(staking.address, 100).encodeABI()
-    console.log(approveData)
     let stakeData = await staking.contract.methods.stake(100).encodeABI()
 
     let nestedTransactionData = '0x' +
