@@ -62,6 +62,7 @@ The method is public, therefore it can be called by anyone. The address of the G
 `SelfKeySafeFactory` contract is currently deployed on Ethereum Ropsten and Mainnet networks with the following addresses:
 
 Mainnet: 0x6437454Cebcc188860c6Fe16d36BF2f6cBCFC936
+
 Ropsten: 0xF53506D009f0b1EBD961285B40CEa207cC628519
 
 ## Web3 Examples
