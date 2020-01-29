@@ -103,8 +103,8 @@ const gnosisMasterCopy = '0x8d7ef7cDCa4F7704eA2a47AcfA94FA8d2F1C631c' // address
 
 // deploy new SelfKey Safe instance
 let tx = await factory.methods.deploySafeProxy(gnosisMasterCopy, "0x").send({ 'from': senderAddress })
-let newProxyAddress = result.events.SelfKeySafeProxyCreated.returnValues.proxy
-let proxyDID = result.events.SelfKeySafeProxyCreated.returnValues.did   // this DID is controlled by Gnosis proxy
+let newProxyAddress = tx.events.SelfKeySafeProxyCreated.returnValues.proxy
+let proxyDID = tx.events.SelfKeySafeProxyCreated.returnValues.did   // this DID is controlled by Gnosis proxy
 
 let gnosis = new web3.eth.Contract(gnosisABI, newProxyAddress)
 ```
